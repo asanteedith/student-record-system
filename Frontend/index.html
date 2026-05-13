@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Record System</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="nav-brand">
+      <div class="nav-logo">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+          <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+        </svg>
+      </div>
+      <span class="nav-title">StudentRecords</span>
+    </div>
+    <button class="btn btn-primary" id="btnAddStudent" aria-label="Add Student">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <path d="M12 5v14M5 12h14"/>
+      </svg>
+      Add Student
+    </button>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main-container">
+
+    <!-- STATS BAR -->
+    <div class="stats-bar">
+      <div class="stat-item">
+        <span class="stat-label">Total Students</span>
+        <span class="stat-value" id="statTotal">0</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-label">Avg GPA</span>
+        <span class="stat-value" id="statAvgGpa">—</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-label">Majors</span>
+        <span class="stat-value" id="statMajors">0</span>
+      </div>
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+      <div class="search-box">
+        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="m21 21-4.35-4.35"/>
+        </svg>
+        <input type="text" id="searchInput" placeholder="Search by Student ID..." autocomplete="off" aria-label="Search by Student ID">
+      </div>
+      <button class="btn btn-outline" id="btnSearch" aria-label="Search">Search</button>
+      <button class="btn btn-ghost" id="btnClear" aria-label="Clear search">Clear</button>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-card">
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Student ID</th>
+              <th>Email</th>
+              <th>Major</th>
+              <th>GPA</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <tr id="emptyRow" class="empty-row">
+              <td colspan="6">
+                <div class="empty-state">
+                  <div class="empty-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                      <circle cx="9" cy="7" r="4"/>
+                      <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                  </div>
+                  <p class="empty-title">No students found</p>
+                  <p class="empty-sub">Add a new student or search by ID to get started.</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- PAGINATION -->
+      <div class="pagination-bar">
+        <div class="pagination-left">
+          <label for="rowsSelect" class="rows-label">Rows per page</label>
+          <select class="rows-select" id="rowsSelect" title="Rows per page">
+            <option value="10">10</option>
+            <option value="25" selected>25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+        <div class="pagination-right">
+          <span id="pageInfo" class="page-info">Page 1 of 1</span>
+          <button class="page-btn" id="prevPage" disabled aria-label="Previous page" title="Previous page">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M15 18l-6-6 6-6"/>
+            </svg>
+          </button>
+          <button class="page-btn" id="nextPage" disabled aria-label="Next page" title="Next page">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M9 18l6-6-6-6"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ADD / EDIT STUDENT MODAL -->
+  <div class="modal-overlay" id="studentModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modalTitle">Add New Student</h2>
+        <button class="modal-close" onclick="closeModal('studentModal')" aria-label="Close modal" title="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <form id="studentForm">
+        <input type="hidden" id="formMode" value="create">
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-field">
+              <label for="formStudentId">Student ID</label>
+              <input type="text" id="formStudentId" placeholder="e.g. S12345" required autocomplete="off">
+            </div>
+            <div class="form-field">
+              <label for="formName">Full Name</label>
+              <input type="text" id="formName" placeholder="e.g. Jane Smith" required>
+            </div>
+          </div>
+          <div class="form-field">
+            <label for="formEmail">Email Address</label>
+            <input type="email" id="formEmail" placeholder="e.g. jane@university.edu" required>
+          </div>
+          <div class="form-row">
+            <div class="form-field">
+              <label for="formMajor">Major</label>
+              <input type="text" id="formMajor" placeholder="e.g. Computer Science" required>
+            </div>
+            <div class="form-field">
+              <label for="formGPA">GPA (0.0 – 4.0)</label>
+              <input type="number" id="formGPA" placeholder="e.g. 3.75" step="0.01" min="0" max="4" required>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" onclick="closeModal('studentModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Student</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- VIEW STUDENT MODAL -->
+  <div class="modal-overlay" id="viewModal">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h2>Student Details</h2>
+        <button class="modal-close" onclick="closeModal('viewModal')" aria-label="Close modal" title="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="view-profile">
+          <div class="view-avatar" id="viewAvatar"></div>
+          <div>
+            <h3 id="viewName"></h3>
+            <span id="viewId" class="view-id"></span>
+          </div>
+        </div>
+        <div class="view-grid">
+          <div class="view-item">
+            <label>Email</label>
+            <span id="viewEmail"></span>
+          </div>
+          <div class="view-item">
+            <label>Major</label>
+            <span id="viewMajor"></span>
+          </div>
+          <div class="view-item">
+            <label>GPA</label>
+            <span id="viewGPA" class="gpa-large"></span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('viewModal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DELETE MODAL -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h2>Delete Student</h2>
+        <button class="modal-close" onclick="closeModal('deleteModal')" aria-label="Close modal" title="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="delete-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+            <path d="M10 11v6M14 11v6"/>
+            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+          </svg>
+        </div>
+        <p class="delete-text">Are you sure you want to delete <strong id="deleteStudentName"></strong>?</p>
+        <p class="delete-sub">This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('deleteModal')">Cancel</button>
+        <button class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast" class="toast" role="alert" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
